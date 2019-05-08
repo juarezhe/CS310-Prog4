@@ -11,26 +11,28 @@ import java.util.Iterator;
 import data_structures.DictionaryADT;
 
 public class BinarySearchTree<K extends Comparable<K>, V> implements DictionaryADT<K, V> {
-	private long modificationCounter, entryNumber;
+	private long modificationCounter;
 	private int currentSize;
-	private Node<V> root = null;
+	private Node<K, V> root;
 
-	private class Node<T> {
-		private Node<T> left, right;
-		private K mKey;
-		private V mValue;
+	@SuppressWarnings("hiding")
+	private class Node<K, V> {
+		private Node<K, V> left, right;
+		private K key;
+		private V value;
 
 		public Node(K key, V value) {
-			this.mKey = key;
-			this.mValue = value;
+			this.key = key;
+			this.value = value;
 			this.left = this.right = null;
 		}
 	}
 
 	// Default constructor
 	public BinarySearchTree() {
+		this.root = null;
 		this.currentSize = 0;
-		this.modificationCounter = this.entryNumber = 0;
+		this.modificationCounter = 0;
 	}
 
 	@Override
@@ -41,10 +43,27 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements DictionaryA
 
 	@Override
 	public boolean add(K key, V value) {
-		if (this.currentSize == 0)
-		// TODO Auto-generated method stub
+		if (this.isEmpty())
+			this.root = new Node<K, V>(key, value);
+		else if (!this.add(key, value, root, null, false))
+			return false;
 		this.currentSize++;
 		this.modificationCounter++;
+		return true;
+	}
+
+	private boolean add(K key, V value, Node<K, V> node, Node<K, V> parent, boolean wasLeft) {
+		if (node == null) {
+			if (wasLeft)
+				parent.left = new Node<K, V>(key, value);
+			else
+				parent.right = new Node<K, V>(key, value);
+			return true;
+		}
+		if (((Comparable<K>) key).compareTo((K) node.key) < 0)
+			return add(key, value, node.left, node, true);
+		if (((Comparable<K>) key).compareTo((K) node.key) > 0)
+			return add(key, value, node.right, node, false);
 		return false;
 	}
 
@@ -54,10 +73,25 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements DictionaryA
 		return false;
 	}
 
+	/*
+	 * Code adapted from [insert book and author]
+	 */
 	@Override
 	public V getValue(K key) {
-		// TODO Auto-generated method stub
-		return null;
+		return getValue(key, root);
+	}
+
+	/*
+	 * Code adapted from [insert book and author]
+	 */
+	private V getValue(K key, Node<K, V> node) {
+		if (node == null)
+			return null;
+		if (((Comparable<K>) key).compareTo((K) node.key) < 0)
+			return getValue(key, node.left);
+		if (((Comparable<K>) key).compareTo((K) node.key) > 0)
+			return getValue(key, node.right);
+		return (V) node.value;
 	}
 
 	@Override
@@ -79,7 +113,7 @@ public class BinarySearchTree<K extends Comparable<K>, V> implements DictionaryA
 
 	@Override
 	public boolean isEmpty() {
-		return this.currentSize == 0;
+		return this.root == null;
 	}
 
 	@Override
