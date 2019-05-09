@@ -10,11 +10,25 @@ package data_structures;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
 import data_structures.DictionaryADT;
 
 public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V> {
-	
+	private class DictionaryNode<K extends Comparable<K>, V> implements Comparable<DictionaryNode<K, V>> {
+		K key;
+		V value;
+		
+		DictionaryNode(K k, V v) {
+			this.key = k;
+			this.value = v;
+		}
+
+		@Override
+		public int compareTo(DictionaryNode<K, V> node) {
+			return this.key.compareTo(node.key);
+		}
+		
+		
+	}
 	
 	private class LinearList<E extends Comparable<E>> implements Iterable<E> {
 		private Node<E> head, tail;
@@ -283,7 +297,12 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		}
 	}
 
-	private LinearList[] table;
+	private LinearList<DictionaryNode<K, V>> table;
+	
+	// Constructor
+	public Hashtable() {
+		table = new LinearList<DictionaryNode<K, V>>();
+	}
 
 	@Override
 	public boolean contains(K key) {
@@ -293,8 +312,13 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public boolean add(K key, V value) {
-		// TODO Auto-generated method stub
-		return false;
+		if (this.isEmpty())
+			this.root = new Node<K, V>(key, value);
+		else if (!this.add(key, value, root, null, false))
+			return false;
+		this.currentSize++;
+		this.modificationCounter++;
+		return true;
 	}
 
 	@Override
