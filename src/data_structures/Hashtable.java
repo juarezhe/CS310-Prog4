@@ -11,12 +11,14 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import data_structures.DictionaryADT;
+import data_structures.BinarySearchTree.Node;
 
 public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V> {
+	@SuppressWarnings("hiding")
 	private class DictionaryNode<K extends Comparable<K>, V> implements Comparable<DictionaryNode<K, V>> {
 		K key;
 		V value;
-		
+
 		DictionaryNode(K k, V v) {
 			this.key = k;
 			this.value = v;
@@ -24,12 +26,10 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 		@Override
 		public int compareTo(DictionaryNode<K, V> node) {
-			return this.key.compareTo(node.key);
+			return ((Comparable<K>) this.key).compareTo((K) node.key);
 		}
-		
-		
 	}
-	
+
 	private class LinearList<E extends Comparable<E>> implements Iterable<E> {
 		private Node<E> head, tail;
 		private int currentSize;
@@ -56,6 +56,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		 * Adds the Object obj to the beginning of list and returns true if the list is
 		 * not full. returns false and aborts the insertion if the list is full.
 		 */
+		@SuppressWarnings("unused")
 		public boolean addFirst(E obj) {
 			Node<E> newNode = new Node<E>(obj);
 			newNode.next = this.head;
@@ -169,6 +170,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		 * Returns the first element in the list, null if the list is empty. The list is
 		 * not modified.
 		 */
+		@SuppressWarnings("unused")
 		public E peekFirst() {
 			return (this.head == null) ? null : this.head.data;
 		}
@@ -177,6 +179,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		 * Returns the last element in the list, null if the list is empty. The list is
 		 * not modified.
 		 */
+		@SuppressWarnings("unused")
 		public E peekLast() {
 			return (this.tail == null) ? null : this.tail.data;
 		}
@@ -208,6 +211,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		/*
 		 * The list is returned to an empty state.
 		 */
+		@SuppressWarnings("unused")
 		public void clear() {
 			this.head = this.tail = null;
 			this.currentSize = 0;
@@ -217,6 +221,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		/*
 		 * Returns true if the list is empty, otherwise false
 		 */
+		@SuppressWarnings("unused")
 		public boolean isEmpty() {
 			return this.currentSize == 0;
 		}
@@ -224,6 +229,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		/*
 		 * Returns true if the list is full, otherwise false
 		 */
+		@SuppressWarnings("unused")
 		public boolean isFull() {
 			return false;
 		}
@@ -231,6 +237,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		/*
 		 * Returns the number of Objects currently in the list.
 		 */
+		@SuppressWarnings("unused")
 		public int size() {
 			return this.currentSize;
 		}
@@ -301,29 +308,35 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 	private LinearList<DictionaryNode<K, V>>[] table;
 	private long modificationCounter;
 	private int currentSize;
-	
+
 	// Default constructor
 	public Hashtable() {
 		this(DEFAULT_MAX_CAPACITY);
 	}
-	
+
 	// Custom constructor
 	@SuppressWarnings("unchecked")
 	public Hashtable(int requestedSize) {
-		this.table = (LinearList[]) new Object[requestedSize];
+		this.table = new LinearList[requestedSize];
+		for (int i = 0; i < this.table.length; i++)
+			this.table[i] = new LinearList<DictionaryNode<K, V>>();
 		this.currentSize = 0;
 		this.modificationCounter = 0;
 	}
 
 	@Override
 	public boolean contains(K key) {
-		// TODO Auto-generated method stub
-		return false;
+		return getValue(key) != null;
 	}
 
 	@Override
 	public boolean add(K key, V value) {
-		table[key.hashCode()].addLast(new DictionaryNode<K, V>(key, value));
+		DictionaryNode<K, V> newNode = new DictionaryNode<K, V>(key, value);
+		int hashValue = (key.hashCode() & 0x7FFFFFFF) % this.table.length;
+
+		if (this.table[hashValue].contains(newNode))
+			return false;
+		this.table[hashValue].addLast(newNode);
 		this.currentSize++;
 		this.modificationCounter++;
 		return true;
@@ -331,56 +344,109 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public boolean delete(K key) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean wasDeleted = this.table[(key.hashCode() & 0x7FFFFFFF) % this.table.length]
+				.remove(new DictionaryNode<K, V>(key, null)) != null;
+
+		if (wasDeleted) {
+			this.currentSize--;
+			this.modificationCounter++;
+		}
+		return wasDeleted;
 	}
 
 	@Override
 	public V getValue(K key) {
-		// TODO Auto-generated method stub
-		return null;
+		return (V) this.table[(key.hashCode() & 0x7FFFFFFF) % this.table.length]
+				.find(new DictionaryNode<K, V>(key, null)).value;
 	}
 
 	@Override
 	public K getKey(V value) {
-		// TODO Auto-generated method stub
+		// get list of every single item, check for value
 		return null;
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.currentSize;
 	}
 
 	@Override
 	public boolean isFull() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.currentSize == 0;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-
+		this.table = (LinearList[]) new Object[table.length];
+		this.currentSize = 0;
+		this.modificationCounter++;
 	}
 
 	@Override
 	public Iterator<K> keys() {
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorHelper<K>(IteratorHelper.KEYS);
 	}
 
 	@Override
 	public Iterator<V> values() {
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorHelper<V>(IteratorHelper.VALUES);
 	}
 
+	// IteratorHelper class allows for tracking of changes since Iterator creation.
+	// Operates in fail-fast mode.
+	private class IteratorHelper<T> implements Iterator<T> {
+		private static final int KEYS = 0;
+		private static final int VALUES = 1;
+		private T[] auxArray;
+		private int iterIndex, copyIndex, target;
+		private long stateCheck;
+
+		@SuppressWarnings("unchecked")
+		public IteratorHelper(int target) {
+			this.stateCheck = modificationCounter;
+			this.iterIndex = this.copyIndex = 0;
+			this.auxArray = (T[]) new Object[currentSize];
+			this.target = target;
+			copyInOrder(root);
+		}
+
+		// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
+		@SuppressWarnings("unchecked")
+		private void copyInOrder(Node<K, V> node) {
+			if (node != null) {
+				copyInOrder(node.left);
+				this.auxArray[this.copyIndex++] = this.target == KEYS ? (T) node.key : (T) node.value;
+				copyInOrder(node.right);
+			}
+		}
+
+		// Returns true if the list has a next item, false if not
+		@Override
+		public boolean hasNext() {
+			if (this.stateCheck != modificationCounter)
+				throw new ConcurrentModificationException();
+			return this.iterIndex < this.auxArray.length;
+		}
+
+		// If the list has a next item, that item is returned
+		@Override
+		public T next() {
+			if (!hasNext())
+				throw new NoSuchElementException();
+			return (T) this.auxArray[this.iterIndex++];
+		}
+
+		// Unsupported operation for fail-fast iterator
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
 }
