@@ -323,12 +323,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public boolean add(K key, V value) {
-		// hash key
-		// add K, V pair to array element from hash
-		if (this.isEmpty())
-			this.root = new Node<K, V>(key, value);
-		else if (!this.add(key, value, root, null, false))
-			return false;
+		table[key.hashCode()].addLast(new DictionaryNode<K, V>(key, value));
 		this.currentSize++;
 		this.modificationCounter++;
 		return true;
