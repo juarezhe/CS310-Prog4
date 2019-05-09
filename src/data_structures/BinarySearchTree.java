@@ -33,7 +33,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 		}
 	}
 
-	// Default constructor
+	// Constructor
 	public BinarySearchTree() {
 		this.root = null;
 		this.currentSize = 0;
@@ -218,7 +218,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 	public Iterator<V> values() {
 		return new IteratorHelper<V>(IteratorHelper.VALUES);
 	}
-
+	
 	// IteratorHelper class allows for tracking of changes since Iterator creation.
 	// Operates in fail-fast mode.
 	private class IteratorHelper<T> implements Iterator<T> {
