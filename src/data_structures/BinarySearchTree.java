@@ -225,7 +225,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 		private static final int KEYS = 0;
 		private static final int VALUES = 1;
 		private T[] auxArray;
-		private int iterIndex, copyIndex;
+		private int iterIndex, copyIndex, target;
 		private long stateCheck;
 
 		@SuppressWarnings("unchecked")
@@ -233,16 +233,17 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 			this.stateCheck = modificationCounter;
 			this.iterIndex = this.copyIndex = 0;
 			this.auxArray = (T[]) new Object[currentSize];
-			copyInOrder(root, target);
+			this.target = target;
+			copyInOrder(root);
 		}
 		
 		// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 		@SuppressWarnings("unchecked")
-		private void copyInOrder(Node<K, V> node, int target) {
+		private void copyInOrder(Node<K, V> node) {
 			if (node != null) {
-				copyInOrder(node.left, target);
-				this.auxArray[this.copyIndex++] = target == KEYS ? (T) node.key : (T) node.value;
-				copyInOrder(node.right, target);
+				copyInOrder(node.left);
+				this.auxArray[this.copyIndex++] = this.target == KEYS ? (T) node.key : (T) node.value;
+				copyInOrder(node.right);
 			}
 		}
 

@@ -83,21 +83,25 @@ public class BalancedTree<K extends Comparable<K>, V extends Comparable<V>> impl
 
 	@Override
 	public Iterator<K> keys() {
-		return new IteratorHelper<K>();
+		return new IteratorHelper<K>(IteratorHelper.KEYS);
 	}
 
 	@Override
 	public Iterator<V> values() {
-		return new IteratorHelper<V>();
+		return new IteratorHelper<V>(IteratorHelper.VALUES);
 	}
 
 	private class IteratorHelper<T> implements Iterator<T> {
-		@SuppressWarnings("unchecked")
-		private Iterator<T> iterator = (Iterator<T>) tree.entrySet().iterator();
+		private static final int KEYS = 0;
+		private static final int VALUES = 1;
+		private Iterator<Entry<K, V>> iterator;
 		private long stateCheck;
+		private int target;
 
-		public IteratorHelper() {
+		public IteratorHelper(int target) {
+			iterator = tree.entrySet().iterator();
 			this.stateCheck = modificationCounter;
+			this.target = target;
 		}
 
 		// Returns true if the list has a next item, false if not
@@ -109,11 +113,14 @@ public class BalancedTree<K extends Comparable<K>, V extends Comparable<V>> impl
 		}
 
 		// If the list has a next item, that item is returned
+		@SuppressWarnings("unchecked")
 		@Override
 		public T next() {
 			if (!hasNext())
 				throw new NoSuchElementException();
-			return (T) this.iterator.next();
+			T valueToReturn = this.target == KEYS ? (T) this.iterator.next().getKey()
+					: (T) this.iterator.next().getValue();
+			return (T) valueToReturn;
 		}
 
 		// Unsupported operation for fail-fast iterator
