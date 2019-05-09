@@ -3,6 +3,8 @@
  * CS-310
  * 7 May 2019
  * @author Hannah Juarez cssc1481
+ * 
+ * Contains code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
  */
 
 package data_structures;
@@ -45,7 +47,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 		return getValue(key) != null;
 	}
 
-	// Code adapted from [book, author]
+	// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 	@Override
 	public boolean add(K key, V value) {
 		if (this.isEmpty())
@@ -60,7 +62,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 	// Adds the given key/value pair to the dictionary. Returns
 	// false if the dictionary is full, or if the key is a duplicate.
 	// Returns true if addition succeeded.
-	// Code adapted from [book, author]
+	// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 	private boolean add(K key, V value, Node<K, V> node, Node<K, V> parent, boolean wasLeft) {
 		if (node == null) {
 			if (wasLeft)
@@ -136,7 +138,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 		return true;
 	}
 
-	// Code adapted from [book, author]
+	// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 	@Override
 	public V getValue(K key) {
 		return getValue(key, root);
@@ -144,7 +146,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 
 	// Returns the value associated with the parameter key. Returns
 	// null if the key is not found or the dictionary is empty.
-	// Code adapted from [book, author]
+	// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 	private V getValue(K key, Node<K, V> node) {
 		if (node == null)
 			return null;
@@ -234,6 +236,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 			copyInOrder(root, target);
 		}
 		
+		// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
 		@SuppressWarnings("unchecked")
 		private void copyInOrder(Node<K, V> node, int target) {
 			if (node != null) {
