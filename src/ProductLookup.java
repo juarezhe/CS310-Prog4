@@ -2,9 +2,11 @@ import java.util.Iterator;
 import data_structures.*;
 
 public class ProductLookup {
+	private DictionaryADT<StockItem> table;
+	
 	// Constructor. There is no argument-less constructor, or default size
 	public ProductLookup(int maxSize) {
-
+		
 	}
 
 	// Adds a new StockItem to the dictionary

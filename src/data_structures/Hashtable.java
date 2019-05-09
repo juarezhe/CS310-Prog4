@@ -11,7 +11,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import data_structures.DictionaryADT;
-import data_structures.BinarySearchTree.Node;
 
 public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V> {
 	@SuppressWarnings("hiding")
@@ -365,9 +364,9 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		for (int i = 0; i < this.table.length; i++) {
 			for (DictionaryNode<K, V> curr : this.table[i])
 				if (value.compareTo(curr.value) == 0)
-					return curr.key;
-			return null;
+					return (K) curr.key;
 		}
+		return null;
 	}
 	
 
@@ -423,21 +422,10 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 			this.target = target;
 			
 			for (int i = 0; i < table.length; i++) {
-				for ()
-				this.auxArray[this.copyIndex++] = 
+				for (DictionaryNode<K, V> curr : table[i])
+					this.auxArray[this.copyIndex++] = curr;
 			}
-				
-			// copyInOrder(root);
-		}
-
-		// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
-		@SuppressWarnings("unchecked")
-		private void copyInOrder(Node<K, V> node) {
-			if (node != null) {
-				copyInOrder(node.left);
-				this.auxArray[this.copyIndex++] = this.target == KEYS ? (T) node.key : (T) node.value;
-				copyInOrder(node.right);
-			}
+			// sort();
 		}
 
 		// Returns true if the list has a next item, false if not
@@ -449,11 +437,14 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		}
 
 		// If the list has a next item, that item is returned
+		@SuppressWarnings("unchecked")
 		@Override
 		public T next() {
 			if (!hasNext())
 				throw new NoSuchElementException();
-			return (T) this.auxArray[this.iterIndex++];
+			if (this.target == KEYS)
+				return (T) this.auxArray[this.iterIndex++].key;
+			return (T) this.auxArray[this.iterIndex++].value;
 		}
 
 		// Unsupported operation for fail-fast iterator
