@@ -362,19 +362,26 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public K getKey(V value) {
-		// get list of every single item, check for value
-		return null;
+		for (int i = 0; i < this.table.length; i++) {
+			for (DictionaryNode<K, V> curr : this.table[i])
+				if (value.compareTo(curr.value) == 0)
+					return curr.key;
+			return null;
+		}
 	}
+	
 
 	@Override
 	public int size() {
 		return this.currentSize;
 	}
+	
 
 	@Override
 	public boolean isFull() {
 		return false;
 	}
+	
 
 	@Override
 	public boolean isEmpty() {
@@ -404,7 +411,7 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 	private class IteratorHelper<T> implements Iterator<T> {
 		private static final int KEYS = 0;
 		private static final int VALUES = 1;
-		private T[] auxArray;
+		private DictionaryNode<K, V>[] auxArray;
 		private int iterIndex, copyIndex, target;
 		private long stateCheck;
 
@@ -412,9 +419,15 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		public IteratorHelper(int target) {
 			this.stateCheck = modificationCounter;
 			this.iterIndex = this.copyIndex = 0;
-			this.auxArray = (T[]) new Object[currentSize];
+			this.auxArray = new DictionaryNode[currentSize];
 			this.target = target;
-			copyInOrder(root);
+			
+			for (int i = 0; i < table.length; i++) {
+				for ()
+				this.auxArray[this.copyIndex++] = 
+			}
+				
+			// copyInOrder(root);
 		}
 
 		// Code adapted from "Lecture Notes & Supplementary Material" by Riggins, Alan
