@@ -10,9 +10,8 @@ package data_structures;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import data_structures.DictionaryADT;
 
-public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V> {
+public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V>, Iterable<DictionaryNode> {
 	@SuppressWarnings("hiding")
 	private class DictionaryNode<K extends Comparable<K>, V> implements Comparable<DictionaryNode<K, V>> {
 		K key;
@@ -368,19 +367,16 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		}
 		return null;
 	}
-	
 
 	@Override
 	public int size() {
 		return this.currentSize;
 	}
-	
 
 	@Override
 	public boolean isFull() {
 		return false;
 	}
-	
 
 	@Override
 	public boolean isEmpty() {
@@ -397,34 +393,28 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public Iterator<K> keys() {
-		return new IteratorHelper<K>(IteratorHelper.KEYS);
+		return new KeyIteratorHelper<K>();
 	}
 
 	@Override
 	public Iterator<V> values() {
-		return new IteratorHelper<V>(IteratorHelper.VALUES);
+		return new ValueIteratorHelper<V>();
 	}
 
-	// IteratorHelper class allows for tracking of changes since Iterator creation.
-	// Operates in fail-fast mode.
-	private class IteratorHelper<T> implements Iterator<T> {
-		private static final int KEYS = 0;
-		private static final int VALUES = 1;
-		private DictionaryNode<K, V>[] auxArray;
-		private int iterIndex, copyIndex, target;
-		private long stateCheck;
+	private abstract class IteratorHelper<E> implements Iterator<E> {
+		protected DictionaryNode<K, V>[] auxArray;
+		protected int iterIndex, copyIndex;
+		protected long stateCheck;
 
 		@SuppressWarnings("unchecked")
-		public IteratorHelper(int target) {
+		public IteratorHelper() {
+			this.auxArray = new DictionaryNode[currentSize];
 			this.stateCheck = modificationCounter;
 			this.iterIndex = this.copyIndex = 0;
-			this.auxArray = new DictionaryNode[currentSize];
-			this.target = target;
-			
-			for (int i = 0; i < table.length; i++) {
+
+			for (int i = 0; i < table.length; i++)
 				for (DictionaryNode<K, V> curr : table[i])
 					this.auxArray[this.copyIndex++] = curr;
-			}
 			// sort();
 		}
 
@@ -437,20 +427,45 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		}
 
 		// If the list has a next item, that item is returned
-		@SuppressWarnings("unchecked")
 		@Override
-		public T next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			if (this.target == KEYS)
-				return (T) this.auxArray[this.iterIndex++].key;
-			return (T) this.auxArray[this.iterIndex++].value;
-		}
+		public abstract E next();
 
 		// Unsupported operation for fail-fast iterator
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
+	}
+
+	@SuppressWarnings("hiding")
+	private class KeyIteratorHelper<K> extends IteratorHelper<K> {
+		public KeyIteratorHelper() {
+			super();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public K next() {
+			return (K) auxArray[iterIndex].key;
+		}
+	}
+
+	@SuppressWarnings("hiding")
+	private class ValueIteratorHelper<V> extends IteratorHelper<V> {
+		public ValueIteratorHelper() {
+			super();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public V next() {
+			return (V) auxArray[iterIndex].value;
+		}
+	}
+
+	@Override
+	public Iterator<K> iterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
