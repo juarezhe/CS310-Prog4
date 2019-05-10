@@ -11,7 +11,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V>, Iterable<DictionaryNode> {
+public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> implements DictionaryADT<K, V> {
 	@SuppressWarnings("hiding")
 	private class DictionaryNode<K extends Comparable<K>, V> implements Comparable<DictionaryNode<K, V>> {
 		K key;
@@ -354,8 +354,10 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@Override
 	public V getValue(K key) {
-		return (V) this.table[(key.hashCode() & 0x7FFFFFFF) % this.table.length]
-				.find(new DictionaryNode<K, V>(key, null)).value;
+		int hashValue = (key.hashCode() & 0x7FFFFFFF) % this.table.length;
+		if (this.table[hashValue].find(new DictionaryNode<K, V>(key, null)) == null)
+			return null;
+		return (V) this.table[hashValue].find(new DictionaryNode<K, V>(key, null)).value;
 	}
 
 	@Override
@@ -383,10 +385,10 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 		return this.currentSize == 0;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void clear() {
-		this.table = (LinearList[]) new Object[table.length];
+		for (int i = 0; i < this.table.length; i++)
+			this.table[i].clear();
 		this.currentSize = 0;
 		this.modificationCounter++;
 	}
@@ -403,11 +405,12 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	private abstract class IteratorHelper<E> implements Iterator<E> {
 		protected DictionaryNode<K, V>[] auxArray;
-		protected int iterIndex, copyIndex;
-		protected long stateCheck;
+		protected int iterIndex;
+		private int copyIndex;
+		private long stateCheck;
 
 		@SuppressWarnings("unchecked")
-		public IteratorHelper() {
+		private IteratorHelper() {
 			this.auxArray = new DictionaryNode[currentSize];
 			this.stateCheck = modificationCounter;
 			this.iterIndex = this.copyIndex = 0;
@@ -415,7 +418,30 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 			for (int i = 0; i < table.length; i++)
 				for (DictionaryNode<K, V> curr : table[i])
 					this.auxArray[this.copyIndex++] = curr;
-			// sort();
+			shellSort(this.auxArray);
+		}
+
+		private DictionaryNode<K,V>[] shellSort(DictionaryNode<K,V>[] array) {
+			DictionaryNode<K,V>[] n = array;
+			int in, out, h = 1;
+			DictionaryNode<K,V> temp;
+			int size = n.length;
+
+			while (h <= size / 3)
+				h = h * 3 + 1;
+			while (h > 0) {
+				for (out = h; out < size; out++) {
+					temp = n[out];
+					in = out;
+					while (in > h - 1 && n[in - h].compareTo(temp) >= 0) {
+						n[in] = n[in - h];
+						in = in - h;
+					}
+					n[in] = temp;
+				}
+				h = (h - 1) / 3;
+			}
+			return n;
 		}
 
 		// Returns true if the list has a next item, false if not
@@ -439,33 +465,27 @@ public class Hashtable<K extends Comparable<K>, V extends Comparable<V>> impleme
 
 	@SuppressWarnings("hiding")
 	private class KeyIteratorHelper<K> extends IteratorHelper<K> {
-		public KeyIteratorHelper() {
+		private KeyIteratorHelper() {
 			super();
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public K next() {
-			return (K) auxArray[iterIndex].key;
+			return (K) auxArray[iterIndex++].key;
 		}
 	}
 
 	@SuppressWarnings("hiding")
 	private class ValueIteratorHelper<V> extends IteratorHelper<V> {
-		public ValueIteratorHelper() {
+		private ValueIteratorHelper() {
 			super();
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public V next() {
-			return (V) auxArray[iterIndex].value;
+			return (V) auxArray[iterIndex++].value;
 		}
-	}
-
-	@Override
-	public Iterator<K> iterator() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

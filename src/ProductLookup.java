@@ -3,7 +3,7 @@ import data_structures.*;
 
 public class ProductLookup {
 	private DictionaryADT<String, StockItem> table;
-	
+
 	// Constructor. There is no argument-less constructor, or default size
 	public ProductLookup(int maxSize) {
 		this.table = new Hashtable<String, StockItem>(maxSize);
@@ -23,18 +23,30 @@ public class ProductLookup {
 	// Returns the retail price associated with the given SKU value.
 	// -.01 if the item is not in the dictionary
 	public float getRetail(String SKU) {
-		return this.table.getValue(SKU).getRetail();
+		StockItem item = this.table.getValue(SKU);
+
+		if (item == null)
+			return -.01f;
+		return item.getRetail();
 	}
 
 	// Returns the cost price associated with the given SKU value.
 	// -.01 if the item is not in the dictionary
 	public float getCost(String SKU) {
-		return this.table.getValue(SKU).getCost();
+		StockItem item = this.table.getValue(SKU);
+
+		if (item == null)
+			return -.01f;
+		return item.getCost();
 	}
 
 	// Returns the description of the item, null if not in the dictionary.
 	public String getDescription(String SKU) {
-		return this.table.getValue(SKU).getDescription();
+		StockItem item = this.table.getValue(SKU);
+
+		if (item == null)
+			return null;
+		return item.getDescription();
 	}
 
 	// Deletes the StockItem associated with the SKU if it is
@@ -47,13 +59,23 @@ public class ProductLookup {
 	// Prints a directory of all StockItems with their associated
 	// price, in sorted order (ordered by SKU).
 	public void printAll() {
-		this.table.values().toString();
+		Iterator<StockItem> printIterator = this.table.values();
+
+		while (printIterator.hasNext())
+			System.out.println(printIterator.next().getRetail());
 	}
 
 	// Prints a directory of all StockItems from the given vendor,
 	// in sorted order (ordered by SKU).
 	public void print(String vendor) {
-		// for (String item : ((Iterable) this.table).keys())
+		Iterator<StockItem> printIterator = this.table.values();
+		StockItem curr = null;
+
+		while (printIterator.hasNext()) {
+			curr = printIterator.next();
+			if (curr.getVendor().compareTo(vendor) == 0)
+				System.out.println(curr);
+		}
 	}
 
 	// An iterator of the SKU keys.

@@ -97,7 +97,10 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 			return this.delete(key, node.left, node, true);
 		if (((Comparable<K>) key).compareTo((K) node.key) > 0)
 			return this.delete(key, node.right, node, false);
-
+		if(parent == null) {
+			node = null;
+			return true;
+		}
 		if (node.left != null) {
 			if (node.right != null) { // two children
 				Node<K, V> currParent = node;
@@ -124,7 +127,7 @@ public class BinarySearchTree<K extends Comparable<K>, V extends Comparable<V>> 
 				parent.right = node.left;
 			return true;
 		}
-		if (node.right != null) { // right child only
+		else if (node.right != null) { // right child only
 			if (wasLeft)
 				parent.left = node.right;
 			else
